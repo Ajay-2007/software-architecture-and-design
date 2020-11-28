@@ -1,0 +1,41 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(author, "Author")
+Person_Ext(reader, "Reader")
+System_Ext(twilio, "Twilio")
+
+
+System_Boundary(blog, "Acme Blog") {
+    Container(blogService, "Blogging Service", "dropwizard")
+    Container(admin, "Admin FrontEnd", "reactjs")
+    Container(extFe, "External FrontEnd", "html")
+
+
+
+    Rel(author, admin, "Create Post")
+    Rel(admin, admin, "Create Post")
+    
+    Rel(admin, blogService, "Create Post")
+    Rel(admin, blogService, "Update Post")
+    
+    ContainerDb(blogDb, "BlogDb", "MySQL")
+    Rel(blogService, blogDb, "Insert Post Row", "jdbc")
+    Rel(blogService, blogDb, "Update Post Row", "jdbc")
+    Rel(blogService, blogDb, "Read Post Row", "jdbc")
+
+    Container(notification, "Notification Service", "dropwizard")
+    Container(eventBus, "EventBus", "Kafka")
+    Rel(blogService, eventBus, "Post Updated")
+    Rel(notification, eventBus, "Read Messages")
+    Rel(notification, twilio, "New Post Notification")
+
+}
+
+
+Rel(twilio, reader, "New post notification")
+Rel(reader, extFe, "Read Post")
+Rel(extFe, blogService, "Read Post")
+
+@enduml
